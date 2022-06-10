@@ -1,0 +1,117 @@
+
+-30.10.2021 
+1-add password işleminden sonra change password aktifleşmeli. +
+2-nodemailer kontrol.+	
+3-position sayfaları tamamlama.-
+
+31.10.2021
+1-strategy sayfaları tamamlama.+
+2-gidilen strategy sayfasına göre header Color.+
+3-table hatalarını giderme.-
+4-oylamaya giriş.-
+
+01.11.2021
+1-oylamanın yarısı+
+
+02.11.2021
+1-oylama bitiş+
+2-zamana dayalı oy sistemi-
+
+03.11.2021
+1-zamana dayalı oy sistemi+
+2-rate sıralama-
+
+04.11.2021
+1-table hatalarını giderme+
+2-authentication kontrol-
+
+08.11.2021
+1-footer+	
+2-home text place+
+3-fiverr create sell place
+
+17.11.2021
+1-watchlist no-data slot+
+2-store düzenleme+
+3-ortak notify kullanımı.+
+4-Loading efektini global yapma
+
+-Opinions:
+-sadece ilk 1k daki coinler alınabilir.
+
+
+
+Sorunlar:
+Kullanıcı kaydedildiğinde watchlist ve last_votes oluşuyor.Oluşumlar sırayla değil aynı anda olmalıdır.
+last-votes kısmında hide bottom sıkıntılı
+Kayıt silindiğinde bearer token siliniyor ancak connect.sid silinmiyor.
+Authorization kısmını kontrol ettt
+
+-router>index.js url
+-user.vue  url
+-last_votes >watchlist_ids url
+-action>get watchlist coins url
+-table.vue >watchlistFn ,getwatchlist url
+
+ url düzelt.
+
+
+
+
+
+
+
+
+binlerce kriptoparabirimi arasından en iyisini oylayın,
+analiz yapın ve güncel haberlerini edinin.
+
+İstediğiniz strajideki en iyi kriptoparaları bulun,oylayın ve kazanın.
+
+Hangi kriptoparanın en iyisi olduğuna siz karar verin.Her stratejide 
+oyların sıfırlanma tarihi değişir.Böylece istediğiniz stratejideki en iyileri bulun.
+
+
+
+Her strateji için en iyi coinleri bulun,oylayın ve kazanın.
+
+
+
+Not:
+-/votes/reset kullanıcı,son oyları,watchlist,scalpingVotes gibi
+herşeyi siler.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

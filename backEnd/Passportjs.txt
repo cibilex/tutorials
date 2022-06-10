@@ -1,0 +1,404 @@
+Passport js ve Express-session
+kurulum:$ npm install passport
+
+-Authorization işlemlerini kolaylaştırır.Face,google gibi API larla kayıt,giriş yapmayı sağlar.
+
+-Default olarak doğrulama başarılı olursa req.user ile uygulama geneli bir kullanıcı değişkeni oluştururken
+başarısız olursa 401 unauthorized hatasını döndürür.
+
+Not: passport middleware olarak kullanılır ve 2 paramdan oluşur.
+app.post('signup',passport.authenticate('strategy',options)
+
+app.post('/login',
+  passport.authenticate('local', { successRedirect: '/',
+                                   failureRedirect: '/login',
+                                   failureFlash: true })
+);
+
+
+failureFlash:true istek başarısız olursa gönderilecek mesajı sağlar.
+failureFlash:'something went wrong' gibi özel mesaja çevrilebilir.
+
+successFlash:'successfully registered' ile doğrulama olduğu takdirde patlanacak flash yazılabilir.
+
+Not:Passport js req.flash() fonksiyonunu kullanır bu yüzden connect-flash modülü gerekir.
+
+
+Session işlemleri:İşlem başarılı olursa session storage de bir kullanıcı oluşturulur.Ancak
+farklı strateji kullanılıyorsa (her istekte kimlik kontrolü) bu özellik kapatılabilir.
+session.
+
+
+Custom callbacks:Default özellikler yetmiyosa özel callback 
+app.get('/login', function(req, res, next) {
+  passport.authenticate('local', function(err, user, info) {
+    if (err) { return next(err); }
+    if (!user) { return res.redirect('/login'); }
+    req.logIn(user, function(err) {
+      if (err) { return next(err); }
+      return res.redirect('/users/' + user.username);
+    });
+  })(req, res, next);
+});
+Not:Callback yapısında biz kullanıcı oluşturmak için işlem yapmayız.Bunu req.login() isteği ile passportjs yapar.
+
+
+Strategies:Passport js 3 temel strateji adımını izler
+
+1-authentication strategies
+2-application middleware
+3-Sessions(optinal)
+
+
+Strategies:Stratejiler use() ile passporta bağlanır
+
+var passport = require('passport')
+var LocalStrategy = require('passport-local').Strategy;
+
+passport.use(new LocalStrategy(
+  function(username, password, done) {
+    User.findOne({ username: username }, function (err, user) {
+      if (err) { return done(err); }
+      if (!user) {
+        return done(null, false, { message: 'Incorrect username.' });
+      }
+      if (!user.validPassword(password)) {
+        return done(null, false, { message: 'Incorrect password.' });
+      }
+      return done(null, user);
+    });
+  }
+));
+
+return done(null,false) :username veya password hatalı ise döner.3. parametre özel 
+mesaj için kullanılabilir.
+
+return done(null,user) :hata yoksa işlemi kullanıcıyı döndürerek bitirir.
+
+return done(err) bu hatalar haricinde kalanları döndürmek için kullanılır.
+
+Middleware:Passport aşağıdaki koşullarda çalışır.Her istekte authorization olacaksa
+express.session() kullanılmayabilir.
+
+app.configure(function() {
+  app.use(express.static('public'));
+  app.use(express.cookieParser());
+  app.use(express.bodyParser());
+  app.use(express.session({ secret: 'keyboard cat' }));
+  app.use(passport.initialize());
+  app.use(passport.session());
+  app.use(app.router);
+});
+
+Not:Connect flash modülü expresste bulunmadığından indirilmesi gerekir.	
+
+
+
+Kullanıcı standartı:
+
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});                                           //sadece kullanıcı id si kullanılır.
+
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
+});
+
+
+Aşamalar:
+Siteden email ve password gelir
+app.post('login',passport.authenticate('local',{successRedirect:'/',failureRedirect:'/login',failureFlash:true})
+Daha önceden yapıladırılmış stratejiye gidilir ve işlem tamamlanır.
+var passport = require('passport')
+  , LocalStrategy = require('passport-local').Strategy;
+
+passport.use(new LocalStrategy(
+  function(username, password, done) {
+    User.findOne({ username: username }, function(err, user) {
+      if (err) { return done(err); }
+      if (!user) {
+        return done(null, false, { message: 'Incorrect username.' });
+      }
+      if (!user.validPassword(password)) {
+        return done(null, false, { message: 'Incorrect password.' });
+      }
+      return done(null, user);
+    });
+  }
+));
+
+Not:passport js default olarak username ve password parametre isimlerini kullanır.Farklı
+parametreler kullanılmak istenirse 
+passport.use(new LocalStrategy({
+    usernameField: 'email',
+    passwordField: 'passwd'
+  },
+  function(username, password, done) {
+    // ...
+  }
+));
+
+
+OpenId:Kullanıcı her siteye tek tek üye olmak yerine openId si bulunan herhangi bir siteye kaydolur
+(google,facebook...) ardından bu siteler vasıtası ile bu sitelerin openId sini destekleyen sitelerde
+kayıt formunu doldurmak yerine openId ile siteye (facebook,google) üzerinden kayıt sağlar.
+
+Open Id kurulum: $ npm install passport-openid
+
+
+
+var passport = require('passport')
+  , OpenIDStrategy = require('passport-openid').Strategy;
+
+passport.use(new OpenIDStrategy({
+    returnURL: 'http://www.example.com/auth/openid/return',
+    realm: 'http://www.example.com/'
+  },
+  function(identifier, done) {
+    User.findOrCreate({ openId: identifier }, function(err, user) {
+      done(err, user);
+    });
+  }
+));
+
+Formda gönderilecek name openid_identifier olmalıdır. <input type="text" name="openid_identifier"/><br/>
+-2 aşamadan oluşur.
+app.post('/auth/openid', passport.authenticate('openid'));
+
+// The OpenID provider has redirected the user back to the application.
+// Finish the authentication process by verifying the assertion.  If valid,
+// the user will be logged in.  Otherwise, authentication has failed.
+app.get('/auth/openid/return',
+  passport.authenticate('openid', { successRedirect: '/',
+                                    failureRedirect: '/login' }));
+
+
+0Auth 2.0:Bir siteye kayıt olmadan facebook,google gibi hesaplarıyla üçüncü taraf sitelere
+erişim iznini sağlar.
+$ npm install passport-oauth
+
+var passport = require('passport')
+  , OAuth2Strategy = require('passport-oauth').OAuth2Strategy;
+
+passport.use('provider', new OAuth2Strategy({
+    authorizationURL: 'https://www.provider.com/oauth2/authorize',
+    tokenURL: 'https://www.provider.com/oauth2/token',
+    clientID: '123-456-789',
+    clientSecret: 'shhh-its-a-secret'
+    callbackURL: 'https://www.example.com/auth/provider/callback'
+  },
+  function(accessToken, refreshToken, profile, done) {
+    User.findOrCreate(..., function(err, user) {
+      done(err, user);
+    });
+  }
+));
+
+
+
+routes: 
+app.get('/auth/provider', passport.authenticate('provider'));
+
+app.get('/auth/provider/callback',
+  passport.authenticate('provider', { successRedirect: '/',
+                                      failureRedirect: '/login' }));
+
+
+Scope:özellik scope özelliği ile verilir.Çoklu scope olacaksa array içine alınır.
+app.get('/auth/provider',
+  passport.authenticate('provider', { scope: 'email' })
+);
+Gönderi linki :
+<a href="/auth/provider">Log In with OAuth 2.0 Provider</a>
+
+
+
+passportjs with Google:
+kurulum:passport-google-oauth20 or npm install passport-google-oauth2
+
+Bulunması gereken paketler: express express-session passport
+
+1-oogle console giderek credentials bölümünde create credentials>0auth client Id>
+web application >Authorized redirect URIs bölümünü  'http://localhost:8000/auth/google/callback' url i eklenir.
+aynı url serverda 
+var GoogleStrategy = require('passport-google-oauth20').Strategy;
+const passport=require('passport')
+
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "http://localhost:8000/auth/google/callback"
+  },
+  //profil kaydedilecek
+  function(accessToken, refreshToken, profile, cb) {
+    return cb(null,profile)
+  }
+));
+
+bölümüne gerekli yerler credentials bölümünden alınarak eklenir.
+2-Session bölümüne hangi bilgilerin ekleneceği :
+ passport.serializeUser(function(user, done) {
+    done(null,user);
+  });                                           //sadece kullanıcı id si kullanılır.
+  
+  passport.deserializeUser(function(user, done) {
+  done(null,user)
+  });
+
+
+
+
+3-passportun düzgün çalışması için app.js kısmına:
+const session = require('express-session');
+
+app.use(session({
+  resave:true,
+  secret: 'foo',
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+4-Son olarak routera middleware olarak ekleme yapılır..
+require('../../helpers/Oauth/googleAuth')
+
+router.get('/auth/google',passport.authenticate('google', { scope: ['profile','email'] }));
+router.get('/auth/google/callback', 
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  //başarılı olursa
+  function(req, res) {
+   
+    res.redirect("/")
+  });
+router.get('login',(req,res)=>res.send('something went wrong'))
+
+
+Sonuç:auth/google dizinine gelindiğinde google oturum açma ister.Oturum açma olmazsa /login
+olursa / dizinine yönlendirilir. 
+-1 ve 2 adımlar strateji kısmıdır.Farklı dosyada yazılıp 4. adımda require ile istenir.
+-1.adımın callback kısmında veritabanına kaydetme işlemi yapılır.
+
+Not:işlemler tamamlandıktan sonra req.user global olarak kullanıcıyı verir.
+req.logout() kullanıcının çıkışını yapar.Sessiondan kullanıcıyı siler vs.
+
+
+Not:Sayfanın üstüne yeni sayfa açmak için:
+window.open('http://localhost:8080/signup', "customWindow", "width=480, height=640, top=100, left=200")
+ -sayfayı kapatmak için : window.close()
+
+
+
+
+
+
+
+app.get('/auth/google',
+  passport.authenticate('google', { scope:
+      [ 'email', 'profile' ] }
+));
+
+app.get( '/auth/google/callback',
+    passport.authenticate( 'google', {
+        successRedirect: '/auth/google/success',
+        failureRedirect: '/auth/google/failure'
+}));
+'/auth/google'  isteğini google doğrulama,'/auth/google/callback' isteğini callback karşılamalı.
+	
+
+
+4-
+
+helpers/auth.js:
+
+var GoogleStrategy = require( 'passport-google-oauth2' ).Strategy;
+
+passport.use(new GoogleStrategy({
+    clientID:     GOOGLE_CLIENT_ID,
+    clientSecret: GOOGLE_CLIENT_SECRET,
+    callbackURL: "http://yourdomain:3000/auth/google/callback",
+    passReqToCallback   : true
+  },
+  function(request, accessToken, refreshToken, profile, done) {      //doğrulama olursa kayıt işlemi için kullanılabilir.
+    User.findOrCreate({ googleId: profile.id }, function (err, user) {
+      return done(err, user);
+    });
+  }
+));
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});                                           //sadece kullanıcı id si kullanılır.
+
+passport.deserializeUser(function(id, done) {
+done(null,user)
+});
+
+GOOGLE_CLİENT_ID VE GOOGLE_CLIENT_SECRET google credentials bölümünden alınıp yazılır.
+
+index.js:
+require("./helpers/auth.js");
+
+
+5-Çıkış yapma:
+req.logout() //çıkış yapar
+req.session.destroy() sessionu temizler.
+
+
+Nottttttttt:
+Kullanıcı auth20 ile giriş veya kayıt yapmak isterse:
+1-kullanıcı daha önce kaydedilmiş mi 
+--mainRoutersa removeall eklendi  sil
+
+
+
+
+Express-session:
+session vs cookie:
+-session bilgiyi serverda tutarken cookiler client kısmında depolanır.
+-session belirli bir depo büyüklüğü yokken cookielerde vardır.
+-session kullanıcı browserı kapattığında biterken cookieler expired ile verilen süre bittiğinde silinir.
+-cookie:{options}   ile cookie yapılandırması yapılabilir.Options kısmı cookie ozellikleridir.secure,httpOnly gibi.
+reseave:her istekte gelen bilgi daha önce eklenmiş olsa bile bilgiyi günceller ve yeniden kaydeder.Kullanıcı oturumunda expired kısmı varsa true olarak ayarlanmalıdır.
+
+saveUninitialized:Kullanıcı giriş yapmadan öncede boş bir sessionun store kaydedilip kaydedilmeyeceğini sorar.
+secret:Kullanılacak imzamızdır.Environment olarak kullanılmalı.Zorunludur.
+
+-req.session ile session alınır.
+
+-    req.session.regenerate(function(err) {                  //sessionu yeniden oluşturur.Yani içindeki verileri sıfırlar.
+       if(err) //err
+      })
+
+- req.session.destroy(function(err){
+if(err)
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

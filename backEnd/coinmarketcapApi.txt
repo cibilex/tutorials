@@ -1,0 +1,228 @@
+CoinmarketCap API
+NOT:bİLGİLER HER DAKİKA BAŞI GÜNCELLENİR.
+
+1-coinmarketcap kayıt ol ve api key al
+2-Kullanılabilecek istek tipleri:
+/cryptocurrency/  : kripto para birimlerini verir.
+/exchange/   :market bilgilerini verir.  Ücretlidir.
+/global-metrics/ :btc hakimiyeti gibi ekstra market bilgilerini döner.    // standart api key seviyesi yetmez.
+
+3-Endpoint paths:
+/latest   :güncel bilgileri dön.
+/historical : tarihi bigileri dön.Ücretlidir.
+/info    market ve coin logolarını kullanmak için bilgiler dön.
+/map    :alınacak bilgilerin haritasını dön.Özetini.
+
+Not: /listings gelen bilgileri coin değeri veya market değerine göre sıralar.
+
+4-İstek Özellikleri
+a-coinler için coin sembolu(symbol=BTC) veya coin id si (id=1) .Id ile istenmeleri önerilir.Çünkü aynı sembolu kullanan çok coin var.	
+b-exchanges için exchange slugı (slug=binance) veya exchange id si( id=270).
+Not: Tüm para birimleri ISO8671 standart para birimlerini kullanır. Para biriminin sembolunu almak için fiat/maps git.
+İstenen para birimine göre coinin gelmesi için seçeneklerde convert:'USD'   'TRY' 'EUR' ...
+-para birimi yerine değerli maden ile istenmeleri için
+Değerli metal	Para Birimi Kodu	CoinMarketCap Kimliği
+Altın Troy Ons	XAU	3575
+Gümüş Troy Ons	XAG	3574
+platin ons	XPT	3577
+Paladyum Ons	XPD	3576
+
+
+6-Önbelleğe alma stratejisi kullanın:Her kullanıcı istek yaptığında sıfırdan istek oluşturmak yerine önbellekte her dakikada bir yenilenen crypto
+bilgileri bulunabilir ve kullanıcılara bu önbellekten bilgiler sunulabilir.
+7-Retry with exponential backoff mantığını kullanın bu isteklerin hız sınırına takılması veya başka hatalar için tekrar istek yapmamızı sağlar.
+Nodejs için node-retry önerilir.	
+8-cryptocurrency
+
+API endpoints for cryptocurrencies. This category currently includes 10 endpoints:
+/v1/cryptocurrency/map - CoinM0arketCap ID map
+/v1/cryptocurrency/info - Metadata
+/v1/cryptocurrency/listings/latest - Latest listings
+/v1/cryptocurrency/listings/historical - Historical listings.Ücretli
+/v1/cryptocurrency/quotes/latest - Latest quotes
+/v1/cryptocurrency/quotes/historical - Historical quotes.Ücretli
+/v1/cryptocurrency/market-pairs/latest - Latest market pairs
+/v1/cryptocurrency/ohlcv/latest - Latest OHLCV
+/v1/cryptocurrency/ohlcv/historical - Historical OHLCV.Ücretli
+/v1/cryptocurrency/price-performance-stats/latest - Price performance Stats
+
+
+10-
+Cryptocurrency 
+/map						
+/info						
+/listings/latest						
+/quotes/latest
+Fiat API 
+/map
+Exchange API hiçbi bok vermiyor.Üzücü
+Global Market API access
+/quotes/latest
+Ücretsiz api bu istekleri barındırır ve convert kısmında sadece 1 para birimi destekler.Her ay 10 bin istek barındırır.
+
+Örnek istek:
+  const params=qs.stringify({
+    symbol:"BTC",
+    convert:"USD"
+  })
+    const coin=await axios.get(`https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?${params}`,  {
+          headers: {  
+            'X-CMC_PRO_API_KEY': 'e9e6c783-b7ed-4765-8e2f-25921345d933'
+          },
+          json: true
+    })
+
+METADATA:istenilen coinlerin logosunu,facebook sayfasını,kendi sayfalarını,twiterlarını vs vs vs verir.
+https://pro-api.coinmarketcap.com/v1/cryptocurrency/info
+Her 100 coin için 1 kredi.Her istek için 1 kredi.
+params:
+-id,slug veya symbol ile istenebilir.
+-aux ile sadece istenilen bilgiler getirilebilir.default:"urls,logo,description,tags,platform,date_added,notice"
+istenebilecekler:"urls,logo,description,tags,platform,date_added,notice,status"
+
+
+CoinMarketCap ID Map:Tüm coinler hakkında mini bilgi verir.id,slug..
+https://pro-api.coinmarketcap.com/v1/cryptocurrency/map
+params:
+ list_status: default olarak 'active' .Silinmiş coinler için 'inactive' .Kaydı yapılmış ancak verilerinin izlemnesi için gerekli koşulları sağlamayan coinler için 'untracked'.
+start: kaçıncı indexten getirmeye başlayacağını söyler.
+ limit : kaç bilginin getirileceğini söyler.
+sort:default olarak  'id'. 'cmc_rank' ta verilebilir.
+symbol:getirilecek coinlerin sembolleri.
+aux:    hangi bilgilerin getirileceğini söyle. "platform,first_historical_data"....
+
+Cryotocurrency listings/latest :Her 200 coin için 1 istek ayrıca her convert için 1 istek.
+https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest        tüm coinlerin bilgilerini döner. yanıtta coin bilgileri,istenen fiat için
+fiyat değişiklikleri(günlük değişim,şuanki fiyat,son 4 saatteki değişim..) döner.
+cryptocurrency_type :'all' 'coins' 'tokens'    getirilecek cryptocurrency nin türü.
+tag: 'all' 'defi'  'filesharing'     .getirilecek cryptocurrency nin tipi.
+start: number (1,2,34)    kaçıncı indexten itibaren getirileceği.
+limit: number(1,200,21)     kaç coin bilgisinin getirileceği.
+price_min:number (1,23,21)   dolar cinsinden min fiyat.Convert ile başka para birimi yazsak bile dolar cinsinden değerlendirilir.
+price_max:number (123,21,21) dolar cinsinden max fiyat.Convert ile başka para birimi yazsak bile dolar cinsinden değerlendirilir.
+market_cap_min :number (1500,255548)    min market cap
+market_cap_max :number (1500,255548)    max market cap
+volume_24h_min :number (25000,2500)  son 24 saatlik hacme min göre filtrele.
+volume_24h_max :number (25000,2500)  son 24 saatlik hacme max göre filtrele.
+circulating_supply_min :number (25000,2500) dolaşımdaki min miktar.
+circulating_supply_max :number (25000,2500) dolaşımdaki max miktar.
+percent_change_24h_min :number >= -100   (2,3,-29) 24 saatteki min değişim.-100den küçük olmalı.-100 de yokolur zaten.
+percent_change_24h_max :number >= -100  (21,21,3) 24 saatteki max değişim.
+ convert : 'TRY' ,'USD' , 'EUR' ISO8671 'e göre dönüştürülecek para birimi.quotes bölümünde verilir.
+ convert_id : (21,23,221) .Dönüştürülecek para biriminin id si.    https://pro-api.coinmarketcap.com/v1/fiat/map isteği ile hangi para birimlerinin desteklendiği öğrenilebilir.
+sort: Hangi değere göre gelen isteklerin sıralacağını belirtir.
+"name""symbol""date_added""market_cap""market_cap_strict""price"
+"circulating_supply""total_supply""max_supply""num_market_pairs"
+"volume_24h""percent_change_1h""percent_change_24h""percent_change_7d"
+"market_cap_by_total_supply_strict""volume_7d""volume_30d".
+sort_dir: 'asc' 'des'      .ascending=artan,descending=azalan. The direction in which to order cryptocurrencies against the specified sort.
+ aux : getirilecek bilgiler. Defaut :"num_market_pairs,cmc_rank,date_added,tags,platform,max_supply,circulating_supply,total_supply"
+alınabilecek tüm bilgiler: "num_market_pairs,cmc_rank,date_added,tags,platform,max_supply,circulating_supply,total_supply,market_cap_by_total_supply,volume_24h_reported,volume_7d,volume_7d_reported,volume_30d,volume_30d_reported,is_market_cap_included_in_calc"
+
+
+
+
+Cryotocurrency quotes/latest :/v1/cryptocurrency/quotes/latest  belirtilen seçenekler ile sadece belirtilen coinlerin bilgisini döner.100 coin 1 isteğe bedeldir.1 conver 1 istek.
+options:
+id: string  1,2,3,4  coin id si.Çoklu seçim için '2,3,4,2'
+slug:string  'bitcoin' 'ethereum' çoklu seçim için 'bitcoin,ethereum'
+symbol:string 'BTC' ,'ETH' getirilecek coin sembolu.çok seçim için 'BTC,ETH'
+skip_invalid: girilen değerler ile coinler alınırken herhangi bi coin alımında hata olunca istek reddedilir.Hata verilen coinlerde isteğin devam etmesi için false denir.
+ convert : 'TRY' ,'USD' , 'EUR' ISO8671 'e göre dönüştürülecek para birimi.quotes bölümünde verilir.
+convert_id : (21,23,221) .Dönüştürülecek para biriminin id si.    https://pro-api.coinmarketcap.com/v1/fiat/map isteği ile hangi para birimlerinin desteklendiği öğrenilebilir.
+ aux : getirilecek bilgiler. Defaut :"num_market_pairs,cmc_rank,date_added,tags,platform,max_supply,circulating_supply,total_supply"
+alınabilecek tüm bilgiler:num_market_pairs,cmc_rank,date_added,tags,platform,max_supply,circulating_supply,total_supply,market_cap_by_total_supply,volume_24h_reported,volume_7d,
+volume_7d_reported,volume_30d,volume_30d_reported,is_market_cap_included_in_calc
+
+Fiat /map      :fiat para birimlerinin id,sembol,isim ve işaretini verir.
+
+https://pro-api.coinmarketcap.com/v1/fiat/map:
+
+start: number (1,2,34)    kaçıncı indexten itibaren getirileceği.
+limit: number(1,200,21)     kaç coin bilgisinin getirileceği.
+sort :enum Default:'id'    isme göre sıralama için 'name'.
+include_metals: default :false . değerli madenleride dahil etmek için true.
+
+
+Global metrics Quotes: market ile ilgili temel bilgileri (aktif coin sayısı,toplam coin sayısı,24 saatlik defi market hacmi,eth dominance ...)
+ve istenen para birimi ile ilgili bazı bilgileri (toplam hacmi,24 saatlik hacmi.....) verir.
+https://pro-api.coinmarketcap.com/v1/global-metrics/quotes/latest
+Options:
+convert : 'TRY' ,'USD' , 'EUR' ISO8671 'e göre dönüştürülecek para birimi.quotes bölümünde verilir.
+convert_id : (21,23,221) .Dönüştürülecek para biriminin id si.    https://pro-api.coinmarketcap.com/v1/fiat/map isteği ile hangi para birimlerinin desteklendiği öğrenilebilir.
+
+
+
+Price Conversion(fiyat dönüşümleri):girilen symbol için girilen amount ile istenen para birimine dönüşüm yapar.her istek 1 kredi ve her convert 1 kredi
+https://pro-api.coinmarketcap.com/v1/tools/price-conversion
+options:
+id: string  1,2,3,4  coin id si.
+amount:number (10,10.21,201.5,54) cryptocurrency miktarı.Gereklidir.yoksa hata verir.
+symbol:string 'BTC' ,'ETH' getirilecek coin sembolu.
+convert : 'TRY' ,'USD' , 'EUR' ISO8671 'e göre dönüştürülecek para birimi.quotes bölümünde verilir.Çoklu para birimi ücretlidir.
+convert_id : (21,23,221) .Dönüştürülecek para biriminin id si.    https://pro-api.coinmarketcap.com/v1/fiat/map isteği ile hangi para birimlerinin desteklendiği öğrenilebilir.
+
+
+FCAS Listings Latest :FCAS tüm cryptocurrency lerin günlük performansını değerlendiren bir sistemdir. Harf ile  puan verir. A....Z
+https://pro-api.coinmarketcap.com /v1/partners/flipside-crypto/fcas/listings/latest
+100 coin  score için 1 kredi gider.
+start: number (1,2,34)    kaçıncı indexten itibaren getirileceği.
+limit: number(1,200,21)     kaç coin bilgisinin getirileceği.default olarak 100 coindir.Arttır.	
+ aux:default:"point_change_24h,percent_change_24h"    ek bilgi istenebilir. 'point_change_24h,percent_change_24h'
+
+
+FCAS Quotes Latest:FCAS sadece istenilen cryptocurrency lerin günlük performansını değerlendiren bir sistemdir. Harf ile  puan verir. A....Z
+https://pro-api.coinmarketcap.com /v1/partners/flipside-crypto/fcas/quotes/latest
+options:
+id: string  1,2,3,4  coin id si.Çoklu seçim için '2,3,4,2'
+slug:string  'bitcoin' 'ethereum' çoklu seçim için 'bitcoin,ethereum'
+symbol:default :string 'BTC' ,'ETH' getirilecek coin sembolu.çok seçim için 'BTC,ETH'
+aux: ek bilgiler istenebilir. default:'point_change_24h,percent_change_24h'
+
+
+HAT
+
+Hatalar ve Oran Sınırları:İstek başarılıda olsa başarısızda olsa istek objesinde status objesi bulunur.
+Bu objenin içinde error_code,error_message,timestaps,elapsed ve notice gibi ifadeler bulunur.
+Hata yoksa err_code:0, err_message:null olarak döner.
+
+400 (Bad Request) Sunucu, büyük olasılıkla geçersiz bir bağımsız değişken nedeniyle isteği işleyemedi.
+401 (Unauthorized) İsteğinizde, muhtemelen API Anahtarınızla ilgili bir sorun olan geçerli kimlik doğrulama bilgileri eksik.
+402 (Payment Required)API isteğiniz, vadesi geçmiş bir bakiyeye sahip ücretli bir abonelik planı olduğu için reddedildi. Bakiyeyi Geliştirici Portalı faturalandırma sekmesinde ödeyin ve etkinleştirilecektir.
+403 (Forbidden)İsteğiniz, muhtemelen API Anahtarının ilişkili hizmet planındaki bir kısıtlama olan bir izin sorunu nedeniyle reddedildi. İşte uç noktalara yönelik uygun bir hizmet planı haritası .
+429 (Too Many Requests)API Anahtarının hız sınırı aşıldı; Bu bir HTTP isteği daraltma hatasıysa API İstek sıklığınızı yavaşlatmayı düşünün. Gün/ay için aylık API çağrısı kredi limitinize ulaştıysanız hizmet planınızı yükseltmeyi düşünün.
+500 (Internal Server Error) Beklenmeyen bir sunucu sorunuyla karşılaşıldı.
+
+HTTP Status	Error Code	Error Message
+401	1001 [API_KEY_INVALID]	This API Key is invalid.
+401	1002 [API_KEY_MISSING]	API key missing.
+402	1003 [API_KEY_PLAN_REQUIRES_PAYEMENT]	Your API Key must be activated. Please go to pro.coinmarketcap.com/account/plan.
+402	1004 [API_KEY_PLAN_PAYMENT_EXPIRED]	Your API Key's subscription plan has expired.
+403	1005 [API_KEY_REQUIRED]	An API Key is required for this call.
+403	1006 [API_KEY_PLAN_NOT_AUTHORIZED]	Your API Key subscription plan doesn't support this endpoint.
+403	1007 [API_KEY_DISABLED]	This API Key has been disabled. Please contact support.
+429	1008 [API_KEY_PLAN_MINUTE_RATE_LIMIT_REACHED]	You've exceeded your API Key's HTTP request rate limit. Rate limits reset every minute.
+429	1009 [API_KEY_PLAN_DAILY_RATE_LIMIT_REACHED]	You've exceeded your API Key's daily rate limit.
+429	1010 [API_KEY_PLAN_MONTHLY_RATE_LIMIT_REACHED]	You've exceeded your API Key's monthly rate limit.
+429	1011 [IP_RATE_LIMIT_REACHED]	You've hit an IP rate limit.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

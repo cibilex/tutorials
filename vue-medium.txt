@@ -1,0 +1,10 @@
+
+https://stackoverflow.com/questions/59834087/what-does-vuejs-mean-by-calling-themselves-progressive-framework
+Vuejs nedir? HTML,CSS ve javascriptin üzerine oluşturulmuş kademeli bir javascript kütüphanesidir.
+Peki kademeli javascript kütüphanesi nedir ?
+Vue temelde declarative rendering,component yaklaşımını verir.Sadece bunları kullanarak pek çok proje geliştirebilirsiniz.A
+Uygulamanıza routing,state management gibi özellikler eklemek isterseniz tek yapmanız  gereken bağımlılığı indirip basit bir setup yapmak.
+İşte bu olay.Uygulamamızı istediğimiz büyüklükte tutabilmek.Progressive özelliğini tanımlar.
+Peki nedir bölümüze geçelim
+1.Declarative rendering Nedir .Bildirimsel rendering nedir? :  
+Javascript ile HTML inizi değiştirebilmeyi sağlar.

@@ -1,0 +1,377 @@
+DOtENV kullanım durumları:
+PORT
+mongoatlas adresi
+
+
+
+
+package.json dosyasında:
+üretim için= "dev":"nodemon app.js"
+production için="start":"node app.js"
+
+
+
+morgan dev modunda kullanılır sadece.Gelen yanıt bilgisini döner.
+
+
+veritabanı bağlantısı:bağlanamadığındada success mesajı görünür !hata.
+const mongoose = require("mongoose");
+
+const dbConnection = async () => {
+  const url =process.env.MONGODB_URL || "mongodb://localhost/mevn-project";
+  await mongoose.connect(url, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+      useFindAndModify: false
+    })
+    .catch(e=>console.log(e))
+
+    console.log(`successfully connected to ${url}`)
+};
+
+module.exports = dbConnection;
+
+
+mongoose-unique-validator:mongooseta unique için hata mesajı yayınlanamaz.Bize bu sorunu çözer.
+Tek yapmamız gereken paketi indirmek npm install mongoose-unique-validator
+uniqueCaseInsensitive:mongoose-unique-validator için harflerin büyük ve küçüklüğü önemsizdir.Mehmet=MehmET unique ihlal etmiş olur.
+Not:uniqueCaseInsensitive kullanıldığında kayıt olurken büyük küçük harf durumuna bakılır ancak kontrol durumlarında sıkıntı yaşatır.Bunun yerine lowercase:true kullan bazen.
+Kullanım:const mongooseUniqueValidator=require("mongoose-unique-validator")
+//normal schema yazılır ve istenilen veriye unique:true eklenir.
+schemaName.plugin(mongooseUniqueValidator,{message:`{PATH} must be unique`}) 
+-FİND+METHOD (findAndUpdate,findByIdAndUpdate..) kullanıldığında mongoose paketi tetiklemez.Tetiklemesi için güncelleme olurken optionslara eklenir.{ runValidators: true, context: 'query' }
+
+mongoose timestamps:Otomatik olarak doca createdAt ve updatedAt ekler.Doc oluşturulduktan sonra createdAt tarihi eklenir.
+Güncelleme yapıldığında createdAT ve updatedAt tarihinin gizli kalmasını istersek güncelleme sırasında timestamps:false kullanırız.
+userModel.findOneAndUpdate(user,{new:true,timestamps:false})
+
+mongoose minlength özelliği gelen bilgi lowercase şeklinde değilse çalışmaz.
+
+Mongoose Bazı güzel yöntemler:
+Schama.limit() kaç tane geleceğini söyler
+Schema.sort({propName,descOrAsc})  neye göre sıralanacağını söyler.Böylece gelen bilgi sıralı şekilde gelir.sort({name:1}) name göre .ascending olarak(artan).-1=descending=azalans
+Schema.split(Number) bulunan değerlerde kaçıncı indexten başlaması gerektiğini söyler.
+crytoCurrencyModel.find({age:{$gte:2}}).sort({name:1}).skip(21).limit(2)
+
+
+
+
+
+
+process.exit() :mevcut çalışan node uygulaması sonlanır.
+
+process.argv:consolda dosya çalıştırılken yazılan değerleri array şeklinde alır.
+yazılan değer dosya adı ise c den başlayıp pathini verir.
+node app.js --watch    -> process.argv -> [app.jsPath,--watch]
+
+
+fs.readFileSync(path.join(__dirname, "data.json"), "utf-8")  dosyayı okuyana kadar kodu durdurur.Ardından dosya içindeki veriyi döner.
+
+
+
+
+
+express-ejs-layouts:default olarak views altındaki layout.ejs dosyasını ana dosya yapar ve içerisinde <%- body %> kısmına ejs modüllerini ekler.<%- script%> script alanları buraya eklenir.
+ejs:res.render ile html sayfası dönmesini ve sunucudan veri alma işlemlerinin yapılmasını sağlar.
+const express = require('express');
+const app = express();
+app.set('view engine', 'ejs');
+
+app.use(expressLayouts);
+
+
+
+npm i bcrypt:
+şifreleme:
+bcrypt.genSalt(saltRounds, function(err, salt) {
+    bcrypt.hash(myPlaintextPassword, salt, function(err, hash) {
+        // Store hash in your password DB.
+    });
+});
+karşılaştırma:
+1-async 1://
+ Load hash from your password DB.
+bcrypt.compare(myPlaintextPassword, hash, function(err, result) {
+    // result == true
+});
+2-async 2:
+    const match = await bcrypt.compare(password, user.passwordHash);
+
+    if(match) {
+        //login
+    }
+
+
+
+cookiler:istenilen bilgiyi sunucudan alıp istemcinin header bölümünde saklar.Cookiler üzerinde
+daha etkili yönetim için cookie parser indirilir.
+indirme:npm install cookie-parser
+kurulum:
+const cookieParser=require("cookie-parser")
+app.use(cookieParser())
+
+cookie oluşturma: res.cookie("cookieName","value",{options}) ||     res.setHeader("Set-Cookie,"key=value")
+Js ile cookie almak için document.cookie yazılır.
+options:
+a-maxAge:ne kadar hayatta kalacağını ms cinsinden yazar
+b-secure:boolean.Cookie https ve localhost dışındaki url lerde gönderilmez.
+c-httpOnly:Boolean.Cookie js ile alınamaz.
+-Cookieleri almak için req.cookies kullanılır.
+-res.clearCookie("cookieName")  cookie sil.
+
+
+JWT:isteğin kimin tarafından yapıldığını öğrenmemizi sağlar böylece authorization işlemleri yaparız.
+
+jwt 3 kısımdan oluşur:
+1-Header:hangi algoritmanın kullanıldığını söyler
+2-Payload:Tutmasını istediğimiz bilgiyi tutar.Şifrenelir ancak jwt sitesinde görülür.Sensitive dataları kullanmamalıyız.
+Payload obje tipinde olmalıdır.String veya buffer tipinde ise JSON.stringify() diyerek jsona dönüştürülmeli.Yoksa kontrol edilmez.
+3-Signature:imzamızı kullanacağımız yerdir.Kullanılan tüm bilgiler burada şifrelenerek karıştırılır.
+kurulum:npm install jsonwebtoken
+create:const jwt=require("jsonwebtoken")
+sync->const token=jwt.sign(payload,signature,{options})
+async->jwt.sign({ foo: 'bar' }, privateKey, { algorithm: 'RS256' }, function(err, token) {
+  console.log(token);
+});
+options:
+expiresIn:s	
+algorithm: kullanılacak algoritma. 'RS256'
+
+Doğrulama:
+sync:
+try {
+  var decoded = jwt.verify(token, 'wrong-secret');
+} catch(err) {
+  // err
+} hata varsa hata fırlatılır.Yoksa decoded tokendaki payload kısmını alır.
+async:
+jwt.verify(token, 'wrong-secret', function(err, decoded) {
+  // err
+  // decoded undefined
+});
+
+Not:jwt.decode[token,{options}]
+imzanın durumuna bakmaksızın tokenin payload kısmını döner.
+options:
+complete:true-> hem header kısmını hemde payload kısmını döner.
+
+jwt-not:mongoose objeleri olduğu gibi jwt e dönüştürülemez çünkü mongoose objeleri basit objeler değildir.İçerisinde pek çok farklı method vs bulunur.
+Basit objeye dönüştürmek için toJSON() metodunu kullan.
+const session=await sessionModel.create({
+        userAgent:req.get("user-agent") || "",
+        valid:true,
+        id:user._id
+   })
+   const refreshToken=createJwtToken(session.toJSON(),{expiresIn:config.get("refreshTokenTTL")})
+
+
+
+Not:jwt kısmında signature ve expiresIn,cookie kısmında maxAge ve secure kısmı process.env ile kullanılması önerilir memtşödsa.
+
+İstemci-Sunucu veri alışverişi:İstemciden sunucuya belli veriler gider.Sunucu verileri değerlendirdikten sonra istemciye res ile yanıt döner.
+-Hatalarda res.json() içerisinde gelir.Yani hata olduğunda hatanın kendisi fırlatırmaz onlarda res.json() ile objeye dönüştürülür.
+
+Not:location.assign("url") urle gider ve geçmişe yazar.back ile geri gelinebilir.
+Not:location.replace("url") urle gider ve gidilen url geçmişte geçmiş urlin yerine yazılır..back ile geri gelinemez.
+
+Jwt getirme aşamaları:
+1-cookie var mı ve Bearer: ile başlıyor mu(Bearer: cookie ile token gönderilirken kullanılır)
+2-yoksa redirect login.
+2-Tokenı getir.
+3-Tokeni kontrol et.
+4-hatalıysa redirect login.Doğruysa next()
+ 
+
+
+Mongoose methods:Schema ile istenilen yerde kullanılması için fonk oluşturur.This değeri docu döner.Arraw fonk kullanma.
+
+in model field:Schema.methods.methodName=function(params){ //this=doc}
+in contoller field: const user=await findOne()
+user.methodName(paramValue)
+
+Mongoose static method:Schema ile istenilen yerde kullanılması için fonk oluşur.this değeri modeli döner.arraw fonk kullanma.
+
+in model field:  animalSchema.statics.staticName = function(params) { //this=model }
+in contoller field:ModelName.staticName(paramValue)
+
+
+
+
+
+Bcrpy compare:
+async->bcrypt.compare(myPlaintextPassword, hash).then(function(result) {
+    // result == true
+});
+
+asyncvol2->    const match = await bcrypt.compare(password, user.passwordHash);
+
+    if(match) {
+        //login
+    }
+
+
+mongoose yardımcılar:
+
+
+userModel.findOne({name}).select("+password") ->passworduda getir.
+userModel.findOne({name}).select("password") ->sadece passwordu getir.
+userModel.findOne({name}).select("password email") ->sadece passwordu ve emaili getir.
+
+
+
+Not:Middlewareların req,res,next paramları vardır.Bi satırda birden çok middleware kullanmak için [mid1,mid2]
+
+
+-res.locals:Sonrasında kullanılan tüm görüntü motorları için (ejs,pug..) değişken fırlatır.Geçersiz kılmak için istenmeyen durumlarda null yapılır.
+router.use("*",(req,res,next)=>{
+    res.locals.head="Mehmet ilhanxd"
+    next()
+})
+in home.ejs-> <h1><%- head %></h1>  
+result:<h1>Mehmet ilhanxd </h1>
+
+-req.ValueName=Value : sonrasında kullanılan tüm middlewarelarda değişken oluşturmak için kullanılır.
+
+Ejs:Basit bir görüntü motorudur.
+app.set("view engine", "ejs");
+app.use(expressLayouts);
+express-ejs-layouts:viewsin altındaki layout.ejs dosyasını ana şablon yapar ve içerisindeki
+<%-body%> kısmına res.render ile gelen sayfayı ekler.
+const expressLayouts = require("express-ejs-layouts")
+
+-ejs içerisinde <% js %> <%= variable %> kullanılır.
+
+
+
+Axios-fetch:
+-axios responsu data iken fetch responsu body'dir.res.json() diyerek data alınır.
+-axios isteği iptal edebiliyorken.fetch iptal edemez.
+-axios 3. parti olarak indirilmesi gerekirken fetch yerleşiktir.
+-axios istemci tarafında xsrf koruması sağlarken fetch sağlamaz.
+-axios verileri gönderirken oto olarak jsona çevirir.responsu ise oto olarak objeye çevirir.
+fetch bunu yapmaz manuel olarak dönüşüm ister.
+-axious özel istekler oluşturulabilir.
+-axios istek gitmeden önce istekleri interceptors'ları kullanarak belli işlemlere sokabilir.
+kurulum:npm i axios
+kullanım:import axios from "axios"
+      try{
+     const res=await axios.get("http://localhost:7000/category/api/categories");
+     if(res.status==200) console.log(res)
+      }catch(e){
+        console.log(e)
+      } 	
+post:      try{
+     const res=await axios.post("http://localhost:7000/category/api/categories",{username:"mehmet",surname:"ilhan"}
+);
+     if(res.status==200) console.log(res)
+      }catch(e){
+        console.log(e)
+      } 
+
+Headers Düzenleme:İsteğin headers bölümüne bilgiler eklenebilir veya bilgiler güncellenebilir.GEt requestte 2. parametre kısmında olurken post requestte 3. parametrede eklenir
+        const res=await axios.post("https://jsonplaceholder.typicode.com/posts",{
+          username:username.value,
+        },{
+          headers:{
+            heyyo:"mehmet ilhan cibilex",
+          }
+        })
+
+
+import axios from "axios"
+Özel axios metodu oluşturmak:
+const instance = axios.create({
+  baseURL: 'https://some-domain.com/api/',
+  timeout: 1000,
+  headers: {'X-Custom-Header': 'foobar'}
+});
+export default instance   //böylece istenilen yerde kullanılabilir.
+
+
+-Axios error handling
+axios.get('/user/12345')
+  .catch(function (error) {
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.log(error.response.data);
+      console.log(error.response.status);
+      console.log(error.response.headers);
+    } else if (error.request) {
+      // The request was made but no response was received
+      // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+      // http.ClientRequest in node.js
+      console.log(error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.log('Error', error.message);
+    }
+    console.log(error.config);
+  });
+
+
+Interseptor ile hata yakalama:
+  myAxios.interceptors.response.use(function (response) {
+    // Any status code that lie within the range of 2xx cause this function to trigger
+    // Do something with response data
+    return response;
+  }, function (error) {
+      let err;
+    if (error.response) {//server tarafında hata olduysa
+        console.log(error.response.data);
+        console.log(error.response.status);
+        err=error.response.data
+      } else if (error.request) {  //istek yapıldı ancak res gelmedi.
+        console.log(error.request);
+        err=error.request
+      } else { //bişeyler oldu
+        console.log('Error', error.message);
+        err=error.message
+      }
+    return Promise.reject(err);
+  });
+
+-axios ile delete metodunda post gibi 2.parametreye peyload konulamıyor.
+axios.delete(url,options) olarak çalışır.
+data gönderebilmek için:
+const res=await myAxios.delete('delete-answer',{data:props.answerInfo})
+
+
+Allow - Control - Allow - Origin  HATASI:postman haricinde farklı bir kaynaktan sunucu verilerine erişmek istediğimizde bu hatayı verebilir.
+Bu hatayı gidermek için güvenli rotayı servera söyleriz.
+çözüm 1: router.use((req,res,next)=>{
+        // Website you wish to allow to connect
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8888');
+
+    // Request methods you wish to allow .Varsayılan olarak tamamına izin verir.
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); 
+
+    // Request headers you wish to allow
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+    // to the API (e.g. in case you use sessions)//kimlik bilgilerini içermelidir.istekte credentials:"include" olmalıdır.
+    res.setHeader('Access-Control-Allow-Credentials', true);
+
+    // Pass to next layer of middleware
+    next();
+ })
+çözüm 2:fetch('http://localhost:8080/posts', { mode: 'no-cors' });
+çözüm 3:npm install cors
+const cors=require("cors");
+app.use(cors({
+origin:"*",                    //hangi urllerden geleceğini söyler.* tüm urlleri kabul eder.belirli url yazarsak sadece ordan gelebilir.s
+credantails:true                  //cookiler varsayılan olarak engellenir.cookileride göndermek için fetchte credentials:"include" eklenir.Sunucunun bu cookileri kabul etmesi için credentials:true
+}))                                //methods:["GET","POST"] gibi belirli metodlar yazılırsa yazılmayan metodlar reddedilir.Varsayılan olarak tüm metodlar izinlidir.
+
+
+
+API-KEY saklama:Herhangi bir sitenin apisinin kullanmak için api key istenir.Bu api key ile istemci tarafında axiosa eklenip istek yapıldığında istemci tarafında olduğundan
+aoi key başkaları ulaşabilir.client kendi sunucumuza istek yapar>ordan kendi sunucumuz sunucu tarafında url e api key ekleyerek isteği yapar>gelen bilgi cliente verilir.
+-Url ile sunucuya istek yapılırken obje olarak gönderilir bilgiler.Bu bilgileri url formatına dönüştürmek için qs paketi kullanılır.
+
+
+
+
+
+

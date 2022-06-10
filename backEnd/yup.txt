@@ -1,0 +1,84 @@
+yup 
+a validator for data.
+We can use it for both client and backend.
+https://www.npmjs.com/package/yup#mixedstrictisstrict-boolean--false-schema
+
+npm install yup
+
+import * as yup from "yup"
+
+const schema=yup.object().shape(
+{
+username:yup.string().max(2,errMessage)})
+
+Notes:
+- object().strict().shape({}) : don't use transformation attempts,Transformations must already be applied:
+const userSchema=yup.object().strict().shape({
+    email:yup.string().trim().email("please send a valid email").required("please send a email")}) .
+
+userSchema.validate("   Manksau321@hotmail.com   ") // err
+
+-setLocale:set error message for not-writed error messages.
+yup.setLocale({
+    string:{
+        max:({max,path}:{max:number,path:string})=>`${path} must be lesser than ${max}`,
+        min:({min,path}:{min:number,path:string})=>`${path} must be lesser than ${min}`,
+    }
+})
+
+
+
+
+Mongoose-typescript:@types/mongoose
+
+recommend :interface User{}
+not : interface User extends Document{}
+
+-for Id types: Types.ObjectId
+const schema=new Schema<Interface>({})
+const model=mongoose.model<Interface>()
+
+Array Interface:
+import { Schema, Model, Types } from 'mongoose';
+
+interface BlogPost {
+  _id: Types.ObjectId;
+  title: string;
+}
+
+interface User {
+  tags: Types.Array<string>,
+  blogPosts: Types.DocumentArray<BlogPost>
+}
+
+const schema = new Schema<User, Model<User>>({
+  tags: [String],
+  blogPosts: [{ title: String }]
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,26 @@
+PDF formatında
+şirketin istediği bilgiler içerilmeli.
+İstenilen teknolojiyle alakasız bilgilerin yazılmasına gerek yok.
+Uzun olmamalı.1-2-3.Yeni mezunlarda 1 sayfayı geçmesin.
+Yazım ve imla kurallarına dikkat.
+Farklı fontlar kullanma
+İletişim bilgileri+sosyal medyalar.
+ATS sistemine uyumlu.
+
+Kendinizi özetleyin:
+Kimsiniz
+Okul bilgileri
+Yapılan ve katıldığınız projeler.
+Tecrübe,yoksa yapılan projeler.
+Gönüllü olarak katıldığınız aktiviteler.
+
+Yaptığınız commitler.
+Github kullanımı ve commitler.
+Ürettiğiniz içerikler.Medium,youtube,kişisel blog.
+Katıldığımız kurslar.
+
+
+Olmaması gerekenler.
+-Eksik veya yanlış bilgi
+-Yoran yazı tipleri.
+-İş ile ilgisi olmayan deneyimler.

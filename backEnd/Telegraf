@@ -1,0 +1,226 @@
+Not:grup katıldığında grupta zaten eklenmiş mi kontrol et.
+
+
+
+ctx.message>{from:{kimden},chat:{type:grup mu özel görüşme mi}}
+ctx.botInfo>{bot bilgilerini veri.  }
+ctx.reply("") mesaj gönderme
+ctx.replyWithHTML( "<i>username </i>", ) Sadece bunlar desteklenir:
+<b>bold</b>, <strong>bold</strong>
+<i>italic</i>, <em>italic</em>
+<u>underline</u>, <ins>underline</ins>
+<s>strikethrough</s>, <strike>strikethrough</strike>, <del>strikethrough</del>
+<b>bold <i>italic bold <s>italic bold strikethrough</s> <u>underline italic bold</u></i> bold</b>
+<a href="http://www.example.com/">inline URL</a>
+<a href="tg://user?id=123456789">inline mention of a user</a>
+<code>inline fixed-width code</code>
+<pre>pre-formatted fixed-width code block</pre>
+<pre><code class="language-python">pre-formatted fixed-width code block written in the Python programming language</code></pre>
+
+-Herhangi bir dosya gönderirken resim,video,metin..: metin kısmında markdown kullanmak için options kısmında parse_mode:"Markdown"
+*bold \*text*
+_italic \*text_
+__underline__
+~strikethrough~
+*bold _italic bold ~italic bold strikethrough~ __underline italic bold___ bold*
+[inline URL](http://www.example.com/)
+[inline mention of a user](tg://user?id=123456789)
+`inline fixed-width code`
+```
+pre-formatted fixed-width code block
+```
+```python
+pre-formatted fixed-width code block written in the Python programming language
+```  //böylece bu stiller kullanılabilir. 
+bot.on('sticker', (ctx) => ctx.reply('👍'))   //private kısmında çalşıyor ancak gruplarda çalışmıyor.
+bot.on('sticker')>ctx.message kısmında sticker objesi gelir.
+
+
+-bir metin gönderirken options kısmında aktif keyboardı silmesini sağlayabiliriz.
+  ctx.reply("button deleted",{reply_markup: {remove_keyboard: true}})
+dosya gönderimi:
+    video:    ctx.replyWithVideo({source:path})       //dosya yolu veya
+      ctx.replyWithVideo({
+    source: fs.createReadStream('/path/to/video.mp4')
+  })
+
+    resim:    ctx.replyWithPhoto('https://picsum.photos/200/300/')  //url ile veya     ü
+     ctx.replyWithPhoto({
+        url: 'https://picsum.photos/200/300/?random',
+        filename: 'kitten.jpg'
+      })
+
+    sticker:  ctx.replyWithSticker('123123jkbhj6b')        //file_id ile gönderilir.
+
+    ses:  ctx.replyWithVoice({
+    source: Buffer.alloc()
+  })
+
+  middleware: await next() sonraki midleeware geçer ve onun bitmesini bekler
+  bot.use(async (ctx, next) => {
+  console.time(`Processing update ${ctx.update.update_id}`)
+  await next() // runs next middleware
+  // runs after next middleware finishes
+  console.timeEnd(`Processing update ${ctx.update.update_id}`)
+})
+
+Mesaj silme:ctx.deleteMessage(mesaj_id) mesaj id yazılmazsa son mesajı siler.
+    const is=await ctx.deleteMessage(357)
+    console.log(is)
+
+    private mod:botfather ile değiştirilebilir:Değişikliği tanımlamak için botu kaldırıp tekrar yüklemek gerek.
+    enabled:sadece komut ve bota özel mesajları algılar.
+    disabled : tüm mesajları algılar.
+
+    botu sohbetten atmak:
+    bot.command('quit', (ctx) => {
+  ctx.telegram.leaveChat(ctx.message.chat.id)
+  ctx.leaveChat()
+      })
+
+      Üye işlemleri:belirtilen parametreler zorunlu değil.Parametre konulmazsa mesajı yazandan yola çıkılır.  
+      ctx.getChat(chat_id) chat döndürülür.ctx.message.chat ile ortak yanları var.
+      ctx.getChatAdministrators(chat_id)
+      ctx.getChatMember(userId veya chat_id)
+      ctx.getChatMemberCount(chat_id)
+
+     ctx vs telegram: ctx kullanırken belirtilen çoğu alanın doldurulması zorunlu değilken telegramde zorunludur.(Tüm alanlar değil.)
+     Telegram tanımlama:
+     const { Telegraf ,Telegram}=require("telegraf")
+     const telegram=new Telegram(token)
+     ctx:her isteğin callbacğindeki ctx.
+
+
+     Bot tanımlama:oluşturma: 
+     -keyboard ve inline keyboard:
+     keyboard:footer kısmında gösterir.Değer mesaj olarak yazılır.
+       Markup.removeKeyboard() ile silinmesi gerekir ancak silinmiyor onun yerine.
+         ctx.reply("button deleted",{reply_markup: {remove_keyboard: true}} ile siliniebilir.
+     inlineKeyboard:mesajın altında gösterilir.Değer callback ile döner.Mesaj olarak yazılmaz.
+     const { Markup}=require("telegraf")
+      Markup.keyboard([])
+    örnek1:
+  ctx.reply("bot gelioo",Markup.keyboard([
+    ["mehmet","ahmet"], //1.satır
+    ["deli","veli"]//2.satır
+  ]).oneTime().placeholder())   //placeholder inputta görünecek kısm.oneTime sadece tek kullanımlık der. resize() ve selective() de kullanılır.
+                                //butona tıkladığında buton değeri text eşit olur.ve mesaj olarak gelir.
+
+  örnek2: ctx.reply(
+    'Special buttons keyboard',
+    Markup.keyboard([
+      Markup.button.contactRequest('Send contact'),     //tel no ister
+      Markup.button.locationRequest('Send location')      //lokasyon ister
+    ]).resize()
+  )   //ctx.message.contact ile tel no alınır. 
+      //ctx.message.location ile locasyon alınır.
+
+      bot.on("location") ve bot.on("contact") ile bilgiler alınabilir.
+
+      örnek3:
+          Markup.keyboard(['one', 'two', 'three', 'four', 'five', 'six'], {
+      wrap: (btn, index, currentRow) => currentRow.length >= (index + 1 ) / 2
+    })   //indexleme döndürülen değere göre yapılır.
+    
+    örnek4:bot.action('Dr Pepper', (ctx, next) => {
+  return ctx.reply('👍').then(() => next())
+})  //botun döndürdüğü değer Dr Pepper ise çalıştırır ardından devam ettirir.
+
+Inline keyboard:metin kısmında metnin altına konur.
+    Markup.inlineKeyboard([
+      Markup.button.callback('Coke', 'Coke'),
+      Markup.button.callback('Dr Pepper', 'Dr Pepper', Math.random() > 0.1),
+    ])
+
+      Markup.button.callback(label, val, true gizler.false gösterir),
+-Inline keyboardta gelen bilgile
+bot.action("data") ile yakalanır.
+-ctx.answerCbQuery("text",options) ile cevap verilebilir.true döner işlem tamamlanırsa.text kısmını doldurmak zorunlu değildir.options={ show_alert:true}
+    örnek1:ctx.reply(
+    'random example',
+    Markup.inlineKeyboard([
+      Markup.button.callback('Coke', 'Coke'),
+      Markup.button.callback('Dr Pepper', 'Dr Pepper', Math.random() > 0.1),
+      Markup.button.callback('Pepsi', 'Pepsi',true)
+    ])
+    örnek2:  return ctx.replyWithPhoto({ url: 'https://picsum.photos/200/300/?random' },
+    {
+      caption: 'Caption',
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard([
+        Markup.button.callback('Plain', 'plain'),
+        Markup.button.callback('Italic', 'italic')
+      ])
+    }
+  ) //options kısmında eklendiğinde ... ile eklenir.
+
+  bot.action('italic', async (ctx) => {
+  await ctx.answerCbQuery()
+  await ctx.editMessageCaption('_Caption_', {
+    parse_mode: 'Markdown',
+    ...Markup.inlineKeyboard([
+      Markup.button.callback('Plain', 'plain'),
+      Markup.button.callback('* Italic *', 'italic')
+    ])
+  })
+}) //resimle kullanımı
+
+
+Telegraf api:
+const bot=new Telegraf(token)
+bot.hears("asd") asd mesajı yazıldığında 
+bot.command("log") /log komutu yazılınca
+bot.on("photo,audio,contact,location,groupchat_created..") gibi pek çok tetikleme ile çalışan middleware sağlar.
+bot.action("") callback query için çalışacak middleware.Markup.button.callback('Plain', 'plain'), için.
+
+
+
+Hata ayıklama:Default olarak telegram tekrar dener ve ardından consola yazar.App çöker.
+Bunu engellemek için: bot.catch(err=>)
+err.response=hata bilgilerini
+err.on=hatanın olduğu bölge
+
+ Soru-cevap questionları oluşturma:npm install grammy @grammyjs/stateless-question ile yapılır.Özel soru-cevap ilişkisi sağlar.
+
+ Çoklu soru cevap içim.Form şeklinde tek tek aşamalı şekilde sahneler için.Scenes kullanılır.session gereklidir.
+ link:https://github.com/telegraf/telegraf/issues/705 
+ const {Scenes,session}=require("telegraf")
+ const contactDataWizard = new Scenes.WizardScene(
+  'CONTACT_DATA_WIZARD_SCENE_ID', // first argument is Scene_ID, same as for BaseScene //özel ad
+  (ctx) => {
+    ctx.reply('What is your name?');
+    ctx.wizard.state.contactData = {};
+    return ctx.wizard.next();
+  },
+  (ctx) => {
+    // validation example
+    if (ctx.message.text.length < 2) {
+      ctx.reply('Please enter name for real');
+      return; 
+    }
+    ctx.wizard.state.contactData.fio = ctx.message.text;
+    ctx.reply('Enter your e-mail');
+    return ctx.wizard.back()
+    return ctx.wizard.next();
+  },
+  async (ctx) => {
+    ctx.wizard.state.contactData.email = ctx.message.text;
+    ctx.reply("Thank you for your replies, we'll contact your soon");
+    console.log(ctx.wizard.state.contactData)
+    // await mySendContactDataMomentBeforeErase(ctx.wizard.state.contactData);
+    return ctx.scene.leave();
+  },
+  );
+
+  const stage = new Scenes.Stage([contactDataWizard]);
+  bot.use(session()); 
+  bot.use(stage.middleware());
+   bot.hears('s',(ctx) => ctx.scene.enter('CONTACT_DATA_WIZARD_SCENE_ID')); 
+
+-aşamala kısımlarında geçişler yapmak:
+  ctx.wizard.next() - to advance to next step;
+ctx.wizard.back() - to go back to previous step;
+ctx.wizard.cursor - to get current step index;
+ctx.wizard.selectStep(index) - to jump straight to a given step index, can be used to implement branching;
+
+-ctx.scene.enter("",step) olarak kullanılabilir ve atıfta yapılan index hemen başlanır.

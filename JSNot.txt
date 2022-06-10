@@ -1,0 +1,90 @@
+
+-Gelen sayının virgülden sonraki belli bir basamağını almak için.
+exampleNumber.toFixed(istenenBasamak)
+-Gelen sayıyı her 3 sayıda nokta yerleştirmek için
+exampleNumber.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+-Gelen sayının virgülden sonraki 2 basamağını alıp ardından basamaklarına ayırmak için.
+exampleNumber.	.toString().toFixed().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+
+-Obje üzerinde rahatça key,value ile gezinebilmek için.
+const datas={red:"red",yellow:"green"}
+        for (const [key, value] of Object.entries(datas)) {
+        console.log(value)
+        }
+
+-Array üzerinde index,val ikilisine erişim için.
+for(let [index,val] of array1.entries()){
+  console.log(index,val)
+}
+
+-Ülke isim,code,tel no,başkent bilgilerini json olarak alabilmemiz sağlar. https://www.html-code-generator.com/javascript/json/country-names
+
+
+-string içerisinde number olup olmadığını kontrol /\d/.test("msakdmas2")
+
+-new Date() metodu .toLocaleDateString(locals,options) ile  istenilen ülkeye göre alınabilir.
+    console.log(new Date().toLocaleDateString("tr-TR",{dateStyle:"full"}))
+    console.log(new Date())
+
+  OUTPUT:  10 Aralık 2021 Cuma
+          2021-12-10T20:58:37.787Z
+ ayrıntılar için :https://www.w3schools.com/jsref/jsref_tolocalestring.asp
+
+-Websitemizden sosyal medyalarda paylaşım gönderisi oluşturabilmek için
+https://github.com/bradvin/social-share-urls/ oku.
+example:https://twitter.com/intent/tweet?url={url}&text={title}&via={user_id}&hashtags={hash_tags}
+vue:<q-btn outline type='a' target="_blank" :href="`https://twitter.com/intent/tweet?url=t.me/xFormBot?start=${$route.params.id}&text=Hi there,click this link to fill the form%0aForm title : ${title.toUpperCase()}%0a&hashtags=xformbot,form,telegram`"  label="google"></q-btn>
+
+Array Methods:
+pop
+push
+unshift
+shift
+slice
+splice 
+concat
+every
+some
+find
+forEach
+map
+filter
+"FindIndex" gives us key-value-array values, but "indexOf" looks at the array. So use "FindIndex" if you are working with complex operations.
+FındIndex
+indexOf
+keys
+includes
+Array.isArray
+join
+reverse
+Array.from(arrayLike, (element, index) => { /* ... */ } ) // create a new array from string
+reduce() :reduce((previousValue, currentValue, currentIndex, array) => { /* ... */ }, initialValue).When we use this method with Object we must be determine initialValue.
+sort((firstEl, secondEl) => { /* ... */ } ):if Array elements are string.Everything is okey but If array elements are numbers we have to do something:
+sort: logic:compare first character.So for sorting numbers correctly use -.  
+numbers.sort((a,b)=>b-a) : 
+1-if a-b is greater 0. return 1. // a>b
+2-if a-b is lesser 0  return -1. // a<b
+3-if a-b is equal 0 return 0. // must equal
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

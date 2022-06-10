@@ -1,0 +1,28 @@
+typescript repeat +
+vite repeat + 
+vite>typescript + 
+vite project control+
+components auto importing+
+unplugin-icons:https://github.com/antfu/unplugin-icons+
+pinia+
+sass repeat
+vite-ssr+
+git repeat
+pnpm
+profile website
+
++ =vitesse : https://github.com/antfu/vitesse  : file based routing,netlify any configuration,ts,layout system
+vitespa : https://github.com/ctholho/vitespa: vitesse without ssg.for spa
++=vitesee-ssr
+
+eslint
+figma
+node-fetch
+socket.io
+grapql
+stateless api
+What is State Management?
+
+ing tekrar ve online test
+github page profil düzenle
+vote projeisi için hatalarından arındır github info sayfası oluştur ve home daki etiketi kaldır.

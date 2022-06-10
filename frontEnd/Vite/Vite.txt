@@ -1,0 +1,124 @@
+duplicate action:dosya kopyalama: extensions
+incrementor:sayı arttırır.
+insert numbers:aynı rakama sahip sayıları sıralar.
+
+vue router installation:
+Nottt:Vite ile vue router kullanılırken tüm router işlemleri ../../node_modules/vue-router kısmından istenir.import {useRouter} from "../../node_modules/vue-router" gibi.
+src>router>index.js
+import { createRouter, createWebHistory } from "../../node_modules/vue-router";
+import routes from "./routes";
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+
+});
+
+export default router;
+
+src>router>routes.js
+const routes = [
+    {
+      path: "/",
+      name: "Hs",
+      component:()=>import("../layouts/MainLayout.vue")
+    }
+  ];
+export default routes
+
+src>main.js
+import router from './router'
+myApp.use(router)
+
+
+css dosyaları:main.js kısmında istemek yeterli.
+-özel css dosyaları.İstenen vue için import "../css/hs.css" şeklinde
+istemek yeterli.style tagları arasında oto olarak eklenir.sass dosyalarıda
+
+
+-css module:Herhangi bir css dosyası .module.css ile bitirilirse(asd.module.css)
+css dosyası istenip aynı obje mantığı ile kullanılabilir.+style.module.scss dahil.
+asd.module.css>
+.list{color:red;background-color:green;}
+.header{color:green;font-size:30px;}
+
+Example.vue;
+script>setup>
+import hs from "../css/asd.module.css"
+onMounted(()=>{
+h1.value.className=hs.list
+})
+-import {list} from "../css/hs.module.css" şeklinde de kullanılabilir.
+-Tüm rotalar dev modta iken statiktir.Yani src/about/index.html döner.
+
+
+-Static files:
+-import userImg from "../assets/user.png"  url olarak alır böylece
+src kısımlarında url lerle uğraşmamıza gerek kalmaz.
+<q-img :src="userImg"></q-img>
+
+-4 kb altındaki tüm resimleri string olarak kaydeder.
+build.assetsInlineLimit:Number(byptes) ile bu rakam değiştirilebilir.
+
+-dosyayı url,string veya worker olarak almayı sağlar.sırayla eklenmesi
+gereken bayraklar. ?url,=
+import voronoi from "css-houdini-voronoi/dist/worklet.js?url"
+
+-Huodini:güzel bg ler sunan bi site.
+	
+Kullanım:
+1-istenilen model npm ile indirilir
+2-css-paint-polyfill indirilir ve main.js kısmında eklenir.
+npm i css-paint-polyfill;
+main.js>import 'css-paint-polyfill';
+
+-Vite kullanımını kolaylaştırır.İstenilen vue compunda .voronoi ören
+script>setup>
+import voronoi from "css-houdini-voronoi/dist/worklet.js?url"
+    CSS.paintWorklet.addModule(voronoi);
+
+Huodini not:mesela kullanılan model curved-line olsun:
+import ile istenirken curved-line olarak istenemez.curvedLine olmalı.
+import curvedLine from "curved-line/curved-line.js?url"
+  CSS.paintWorklet.addModule(curvedLine);
+ancak css kısmında yine:curved-line olarak kullanılır.
+
+-json dosyalarını obje mantığı ile getirebilir.
+users.json >{"users":[...],posts:[...]}
+Hello.vue>
+import docs from "../json-server/users.json"
+veya içerisinden istenilen getirilebilir.
+import {posts} from "../json-server/users.json"
+
+-public directory:bu klasördeki statik dosyalar import edilmeden "/user.png"
+şeklinde kullanılabilir.Hash edilmeden productiona çıkartılır.
+
+
+
+-Plugin kullanma:plugin indirilir ardından vite.config.js kısmında 
+plugins:[] eklenir
+eklenilir.
+$ npm i -D @vitejs/plugin-legacy  //eski tarayıcılar içinde kodun uyumlu olmasını sağlar.
+export default defineConfig({
+  plugins: [
+    legacy({
+      targets: ['defaults', 'not IE 11']
+    })
+  ]
+})
+
+-pluginin kullanılacağı ortam:apply:'serve' or 'build':
+  plugins: [{
+ ...typescript2(),
+      apply: 'build'
+}]
+
+-VITE TYPESCRIPT:
+npm init vite@latest my-vue-app -- --template vue-ts
+
+File ststem routing: https://github.com/hannoeru/vite-plugin-pages/blob/main/README.md#index-routes
+$ npm install -D vite-plugin-pages
+$ npm install vue-router@next
+404 PAGE:[...all].vue	
+Not:Default olarak tüm sayfalar async eklenir.
+

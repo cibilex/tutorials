@@ -1,0 +1,52 @@
+-quasar build:dosyalar build edilir.
+
+-backend tarafında statik olarak dosya yolu sunulur.
+   const clientPath=path.join(path.dirname(require.main.filename),"../client/dist/spa")
+   app.use(express.static(clientPath))
+
+-dosyalar statik dosya olarak istenilen urlde verilir.
+
+app.get('/', function (req,res) {
+  res.render(clientPath + "index.html");
+});
+
+-Son olarak redirect durumlarında cannot get verilir.Bunu engellemek için ....
+
+npm install connect-history-api-fallback
+
+app.js:
+const history = require('connect-history-api-fallback');
+app.use(history({
+  disableDotRule: true,
+  verbose: true
+}));
+app.use(express.static(clientPath))
+
+
+Tam kod:
+
+
+const history = require('connect-history-api-fallback');
+const clientPath=path.join(path.dirname(require.main.filename),"../client/dist/spa")
+
+app.use(express.static(clientPath))
+
+app.use(history({
+  disableDotRule: true,
+  verbose: true
+}));
+app.use(express.static(clientPath))
+app.get('/', function (req,res) {
+  res.render(clientPath + "/index.html");
+});
+
+--Notttt:backend ile değiştirilecek resimler require(path) ile değil :src="path" ile alınır.path express.staticte verilen public altından
+başlar.
+
+
+
+
+Production Notları:
+
+-auth kısmında callback urller değiştirilmelidir.Mesela google auth için google consol callback url değiştirilmeli.
+

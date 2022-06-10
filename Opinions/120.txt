@@ -1,0 +1,17 @@
+
+home         sepet
+-mesela toplam para 2000
+alınan ürün fiyat toplam+kalan para=2000 olmalı yoksa hata ver.
+Sorun çözümü:toplam para ve ürün toplamı,kalan para izlenmeli
+herhangi biri değişirse kontrol denklem kontrol edilmeli.
+
+
+-sadece ürünler değil kira,doğalgaz ve elektrik giderleride eklenebilir.
+
+
+-Göreviniz asgari ücretle ... yapmak.
+
+--ülkelere göre asgari ücretle yaşamak
+qaderini seç
+
+

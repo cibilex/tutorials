@@ -1,0 +1,341 @@
+	Firebase:
+npm install firebase
+quasar.config.js > boot:["firebase"]
+
+firebasede proje oluşturduktan sonra gelen scripti boot>firebase.js kısmına yapıştır.
+
+import { initializeApp } from "firebase/app";
+const firebaseConfig={
+  apiKey: "AIzaSyDX6oK4kpLvK-WeS3CYPY1mJvCM5ugx0V4",
+  authDomain: "fir-quasar-372fe.firebaseapp.com",
+  projectId: "fir-quasar-372fe",
+  storageBucket: "fir-quasar-372fe.appspot.com",
+  messagingSenderId: "97031612896",
+  appId: "1:97031612896:web:6bea856813c5b85ea52385",
+  measurementId: "G-Z19FREDCF2"
+}
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+Authorization:auth işlemleri için getAuth istenir.
+import { getAuth } from "firebase/auth";
+const auth = getAuth();
+
+Login:
+signInWithEmailAndPassword(auth,email,password).then(userCredentials=>{
+  const user=userCredentials.user;  
+
+
+}).catch(err=>{
+      const errorCode = err.code;
+    const errorMessage=errorCode.split("/")[1].split("-").join(" ")
+})
+
+signup:
+createUserWithEmailAndPassword(auth,email, password).then(userCredentials=>{
+  const user=userCredentials.user;  
+}).catch(err=>{
+      const errorCode = err.code;
+    const errorMessage=errorCode.split("/")[1].split("-").join(" ")
+})
+Not:signin ve sign up  hata ayıklama:
+const errorMessage=errorCode.split("/")[1].split("-").join(" ")
+
+logout:
+auth.signOut().then(//çıkış yapıldı).catch(//hata oldu)
+
+
+Reaktif kullanıcı durumunu öğrenme:Böylece kullanıcı durumu her değiştiğinde fonk devreye girer.
+Firebase.js kısmında yazılır.
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    // User is signed in, see docs for a list of available properties
+    const uid = user.uid;
+    console.log("user giriş yapmış")
+
+    // ...
+  } else {
+    console.log("user çıkış yapmış")
+    // User is signed out
+    // ...
+  }
+});
+
+Firestore vs realtime database;
+1-realtime sadece apple için çevrimdışı destek sunarken firestore android,web için sunar.
+2-realtime verileri basit json ağacı gibi saklar ve ileri düzey sorgular zorlaşır.
+3-realtime kullanıcı çevrimdışı-çevrimiçi durumunu izleyebilirken firestore cloud function kullanma gerektirir.
+4-realtime kullanıcı yetkisi olduğu kadar alanı günceller,firestore kullanıcının yetkisi olmadığı anlaşıldığı anda tüm istek reddedilir.
+
+
+FireStore Database; belli bir şema yoktur.Her belge farklı keylere sahip olabilir.
+Notttt:Firestore 2 farklı şekilde oluşturulabilir.
+1-Production:bizden kimse göremez,sadece backend isteklerini kabul eder.Değiştirilebilir bu durum.
+2-test:Herkes görebilir,silebilir vs. Client kısmından istek atılabilir.
+Burda client kısmından kullanımı verildi.
+
+import { getFirestore} from "firebase/firestore";
+const db=getFirestore(app);           //bu temeldir.Tüm store işlemlerinde kullanılır.
+
+
+collection alma:
+firestoredan "collection" iste
+const colRef=collection(db,"collectionName");
+
+Tüm verileri getirme:firestoredan getDocs fonku istenir.
+getDocs(colRef).then(snapshot=>{
+  const users=[]
+  for(let doc of snapshot.docs){
+    users.push({id:doc.id, ...doc.data() })
+  }
+  console.log(users)
+}).catch(err=>console.log(err))
+
+Sadece bir doc alma:firestoredan "doc" ve "getDoc" al.
+doc(db,"collectionName","docİd") veya 
+doc(db,"collectionName/docİd") aynı şey.
+getDoc(doc(db,"user","FFYq88Reo86rE6ZJFXBI2")).then(doc=>{
+  if(doc.exists())console.log(doc.data())
+  else console.log("no user with that id")
+})
+
+belli docları alma :
+getDocs(query(colRef,where("username","==","mehmet")))
+
+
+Veri ekleme:
+1-firestoredan addDoc iste.response kısmında data.id alınabilir sadece
+2-setDoc(doc(),{})
+setDoc() girilen doc() ile uyumlu bir doc varsa o docu günceller.
+Varsayılan olarak üzerine yazar.Güncelleme olarak kullanmak için setDoc(doc(),{},{merge:true})
+Bu sayede doc oluştururken id kısmını kendimiz doldurmasına izin verir.
+
+
+updateDoc:firestroden "updateDoc" ve "doc" al.
+updateDoc(doc(db,"user","userid"),{//updating space}).then(//res yok).catch(err=>console.log(err))
+-İç içe geçmiş belgelerde nokta gösterimi kullanılmazsa belgenin tamamı gelen değere eşitlenir
+"user.name":"mehmet" belgenin name kısmı güncellenir
+user:{name:"mehmet"} bekgenin tamamı güncellenir.	
+
+Veri silme:doc ve deleteDoc firestoredan iste
+deleteDoc(doc(db,"collectionName","docId")).then().catch()
+
+
+
+Koleksiyon izleme:güncelleme,ekleme,silme işlemlerinde çalışır.
+firestoredan onsnapshot iste.
+Mantık:İlk yüklemede tüm doclar snapshot.docChanges() içerisinde "added" type ile gelir.
+ardından tüm güncellemeler docChanges() altında verilir ve tipleride verilir.
+"added" "modified" "removed"
+
+onSnapshot(colRef, (snapshot) => {
+  console.log(snapshot.docs.length)
+})
+  //snapshoy addDoc responsu ile aynıdır.
+advanced:
+onSnapshot(colRef, snapshot=>{
+  snapshot.docChanges().forEach((change) => { //change.doc.data()
+    if (change.type === "added") {
+        console.log("New city: ", change.doc.id);
+    }
+    if (change.type === "modified") {
+        console.log("Modified city: ", change.doc.id);
+    }
+    if (change.type === "removed") {
+        console.log("Removed city: ", change.doc.id);
+    }
+});
+})
+
+Sadece bir docu izleme:
+onSnapshot(doc(db,"user","IjbuQ5N6erpxp1VhUO3V"),doc=>{
+  console.log(doc.data())
+  console.log(doc.id)
+})
+
+Koleksiyondaki belli docları izleme:
+firestoredan "query" ve "where" alınır.
+query belli sorgu yapmamızı sağlar.
+where bir sorgu çeşitidir.==,=>,<=,array-contains gibi şeyler alabilir.
+const q=query(colRef,where("username","==","mehmet"))
+onSnapshot(q ,snapshot=>{
+    const users=[]
+    for(let doc of snapshot.docs){
+      users.push({id:doc.id, ...doc.data() })
+    }
+    console.log(users)
+  })   //username=="mehmet" olan docları izle.
+
+
+-orderBy ve limit; query ile sorgu atarken gelen doclar asc ve tamamı gelir.
+"oderBy" ve "limit" firestoredan istenir.
+orderBy:sıralama sağlar. q(collection,orderBy("surname","desc or asc")
+limit():const q=query(colRef),limit(5))
+
+advanced:
+const q=query(colRef,where("user.age",">=",23),orderBy("user.age","desc"),limit(2))
+colrefteki user.age 23 ten fazla olan 2 kişiyi yaşların büyüklüğüne göre sırala.
+
+
+-OrderBy ve limit sınırlamalar:
+-orderby ile istek oluştururken store kısmında index oluşturulmadıysa 
+consolda hata verir linke git ve inindex oluştur.
+-orderBy kısmında verilen alan docta yoksa alan getirilmez.
+-orderBy ve where querileri aynı olmalıdır.
+
+
+serverTimeStamp:firestore için date anlamıdır.firestore dan iste
+createdAt:serverTimeStamp()
+-onsnapshot kullanılırken serverTimeStamp uygulanırsa onsnapshot 2 kere tetiklenir.
+biri doc kaydedilirken diğeri timestamp kaydedilirken.
+
+
+increment():Belirtilen bir değeri arttırmaya yarar.
+updateDoc(doc(db,"user/6C6kmJ3ole3pdpJ5qg1g"),{
+  age:increment(10)       //age 10 artar.
+})
+
+
+runTransaction(db,async(transaction)=>{}):Belli bir doc üzerinde güncelleme,silme,set etme(update,delete,set) işlemi olmadan önce
+belli hesaplamalar gerektiren durumlarda kullanılır.
+-önce get sonra update olmalı.Hata verdiği noktada işlem biter.	
+const userDoc=doc(db,"user/6C6kmJ3ole3pdpJ5qg1g")
+runTransaction(db,async(transaction)=>{
+  const user=await transaction.get(userDoc)
+  if(!user.exists()) throw new Error("no user")
+  //belli hesaplamalar  yapılma kısmı
+  const newAge=user.data().age+15
+  transaction.update(userDoc,{age:newAge})
+}).then().catch(err=>console.log(err))
+
+Not:İç içe koleksiyonlar kullanılabilir.
+const messageRef = doc(db, "rooms", "roomA", "messages", "message1");
+
+
+FireStore güvenlik ve kurallar:client ile kullanımında firestore auth ile kullanılırken
+backend kısmında firebase kullanırsak auth işlemlerini ordan yönetebiliriz.
+firestore rules kısmı yazımı böyle başlar:
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {}
+
+
+anahtarlar:
+match: belli bir yolu tanımlar
+allow:verilen koşula uyulursa işlem sağlar.
+    match /<some_path>/ {
+      allow read, write: if <some_condition>;
+}
+
+Örnekler:
+match /{document=**}{} tüm doc yolları.Tüm doclar.
+ match /cities/{city} {} cities koleksiyonundaki tüm doclar.city temsili olarak docu alır.
+match /cities/"kskasdkmkmkmsdsalkmd" cities koleksiyonundaki id si olan doc.
+allow read, write: if <some_condition>; şeklinde kural oluşur.
+Gelen  istekler:
+1-get 2-list 3-update 4-set 5-delete
+veya
+1-read:get ve listi kapsar
+2-write:update,create ve deleteyi kapsar.
+
+-iç içe geçmiş koleksiyonlar içn
+    match /cities/{city} {
+      match /landmarks/{landmark} {
+        allow read, write: if <condition>;
+      }}
+
+-** sözdizimi tüm alt subcollectionslar içinde kuralların tanımlı olduğunu belirtlir
+match /cities/{city}{} //cities koleksiyonu için
+match /cities/{document=**}{} //cities ve tüm alt koleksiyonları için.
+
+-match /cities/{city}{
+       allow read,write : if request.auth != null
+}     //kullanıcı giriş yapmamış ise read,write yapamaz.
+-    match /users/{userId} {
+      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null;
+    }     kullanıcı giriş yapmamış ise create yapamaz.kullanıcı giriş yapmış ise sadece kendi bilgilerini read,update,delete.
+
+-    match /cities/{city} {
+      allow read: if resource.data.visibility == 'public';
+    } //docta visibility=="public" ise herkes okuyabilir.
+
+-resource.data belgedeki alanları temsil eder.(resource.data.username alınabilir vs)
+-request	.resource.data gelen bilgileri temsil eder.update için.
+    match /cities/{city} {
+      allow update: if request.resource.data.population > 0
+                    && request.resource.data.name == resource.data.name;
+    }}       //cities koleksiyonundaki güncelleme için .gelen population>0 olmalı ve gelen bilgideki isim ve doctaki isim aynı olmalı.
+
+-      allow delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.admin == true //kullanıcı giriş yapış ve 
+users koleksiyonunda bulunan bu kullanıcını admin olarak atanmış.
+
+
+
+-Dikkat edilecekler:
+1-istek yapan kullanıcının sitenin kullanıcısı olduğuna emin ol
+2-    match /stories/{storyid} {
+      // Anyone can read a published story; only story authors can read unpublished stories
+      allow read: if resource.data.published == true || (request.auth != null && request.auth.uid == resource.data.author);
+      // Only story authors can write
+      allow write: if request.auth != null && request.auth.uid == resource.data.author;
+    }
+  }
+3-array uzunluğu
+match /mydocuments/{doc} {
+  allow read: if resource.data.x > 5;
+}
+4-kod tekrarını önlemek için fonk oluşturup istenen yerde çalıştırılabilir.Aynı match içinde
+    match /stories/{storyid} {
+
+      // Returns `true` if the requested story is 'published'
+      // or the user authored the story
+      function authorOrPublished() {
+        return resource.data.published == true || request.auth.uid == resource.data.author;
+      }
+
+      // Deny any query not limited to 10 or fewer documents
+      // Anyone can query published stories
+      // Authors can query their unpublished stories
+      allow list: if request.query.limit <= 10 &&
+                     authorOrPublished();
+
+      // Anyone can retrieve a published story
+      // Only a story's author can retrieve an unpublished story
+      allow get: if authorOrPublished();
+
+      // Only a story's author can write to a story
+      allow write: if request.auth.uid == resource.data.author;
+    }
+5-
+      // Only authenticated users can read
+      allow read: if request.auth != null;
+      // Only the post author can write
+      allow write: if request.auth != null && request.auth.uid == resource.data.author;
+
+6-adminliği kontrol etme:exists(/databases/$(database)/documents/admins/$(userId)
+7-kullanıcı auth olmuş ve istek atan kullanıcı 
+    match /users/{userId}/{documents=**} {
+      // return request.auth.uid == userId
+      function isAuth(){
+      return request.auth != null
+      }
+      allow read,write:if   (isAuth() && request.auth.uid == userId)    || ( isAuth() &&  exists(/databases/$(database)/documents/admins/$(userId)))
+    }	
+
+
+Nottttttt:
+1-login veya signup yapıldığı andan sonraki .then içinde artık kullanıcı auth işlemini tamamlamıştır.
+2-kullanıcı veritabanına kaydedilirken auth kısmındaki uid kullanılmalı.Çokomelli bu.
+Yoksa kullanıcı firestore kayıt attığında request.auth.uid ==userId kısmı hatalı olur.
+  setDoc(doc(db,"users",user.uid),{
+    email:user.email,
+  }).catch(err=>console.log(err))
+3-tüm alt koleksiyonların etkilenmesi için =** kullanmayı unutma.
+
+
+
+
+
+
+

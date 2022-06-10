@@ -1,0 +1,134 @@
+-Herhangi bir işlem tamamlanmadan öbürüne geçilemez.Yapılan işlemi kaydetmek için enter.
+
+-Layers:Katmanlar oluşturur.
+Sağ altta bulunur.
+Layer+sağ click>duplicate layer:katmanı kopyalar.
+
+
+Space:ekran üzerinde hareketi sağlar.
+Move:Layerların posizyonunu değiştirmek için kullanılır.Toolbarda var veya V .
+
+
+Image:resmi oto olarak belli özellikler vermeyi sağlar.	
+
+-jpg birden fazla katmana sahip olamaz.Bu yüzden dosyaları .psd formatına almalıyız.
+-Farklı resimleri birleştirmek için hepsini açtıktan sonra resme basılı tutarak main resme sürüklemek yeterlidir.
+
+Zoom:Tools kısmında var veya z tuşu veya zoom in=ctrl+ zoom out=ctrl -  ctrl+0 :resmi fit screen moda alır.
+ 
+Boyutlandırma:Edit>transform>scale veya ctrl + T
+transform altında:scale,skew,rotate,distort gibi işlemler bulunur.
+-Distort zemine uyum sağlama için çok iyiyken warp arkaplana uyum sağlatmak iiçin iyidir.
+
+Adjustments(Ayarlamalar):Resme renk tonları,kontrasat,koyulaştırma gibi pek çok ayar için layer oluşturma sağlar.windows>adjustments veya sağ toolbarda bulunur.
+Üstünde bulunduğu layerları etkiler.Herhangi bir layerin bu etkileri almasını istemezsek layeri adjustemtin üstüne at.
+Adjustments:Hepsinde preset kısmında önceden belirlenmiş farklı ayarlar var.Custom ayar çekmek istemezsek faydalanılabilir.
+Levels:parlaklık-koyuluğu ayarlar.
+Vibrance:Titreşim ve renk doyumunu ayarlar.
+hue/saturation:Tüm layer veya layerdaki belirli renklerin değişimi,doyumu veya hafifliği ayarlanxabilir.Master herşeyi kapsar.Tek tek renk seçimide olabilir.
+
+
+Text:Text alanını başta belirlemek için text seçtikten sonra fareyle basılı tutarak alanı oluştur.
+Eğimli text:1-pen toola sağ tıklayarak freeform pen tool seçilir ve metin için bir yol oluşturulur.
+2-Texte tıklayarak oluşturulan yolun başına tıklanır.Eğim işareti çıkar.
+3-Metin eklendikten sonra path selection tool seçilerek istenirse path kısaltılır veya ters çevrilir.
+
+Daire etrafında text yapmak:Dairenin her pozisyonu için farklı layer oluşturulur.
+Üst pozisyon:1-Ellipse tool kullanılır ve daire çizilir.Path olarak.
+2-Metin seçilerek istenen yerine text yazılır ve özelleştirilir.
+3-Alt kısım için Üst metinin bulunduğu layer duplicate yapılır ve aynı işlemler uygulanır.Rotate ile alta geçirilir.
+4-Orta kısım için aynı şekilde.
+
+
+
+Layer Effects:Layera çift tıklama veya sağ altta fx butonuna tıklayarak layers effectlere gidilebilir.
+-drop-shadow:gölgeleme işlemleri
+-stroke(inme,felç):Katmanın orta,iç,ve dışını kaplayan bir alan oluşturur.Text ile çok iyi gidiyor.
+bevel-emboss:Derinlik ve kabartma işlemleri.
+-Gradient,inner shadow gibi özellikler bulunur.		
+
+
+
+Çözünürlük: 1 bitmap boyutundaki veri miktarıdır.Bir fotoğrafın boyutunu değiştirdiğimizde veri miktarı sabit olduğundan çözünürlük artar
+veya azalır.Bir fotoğrafın çözünürlüğünü arttırdığımızda boyut azalırken,çözünürlüğü azalttığımızda çözünürlük artar.
+-Bu yüzden sadece küçük boyut değişiklikleri için çözünürlüğü sabitleyebiliriz(Resample) ancak büyük boyutlar sözkonusu ise bunu yapamayız.
+ve Resample kapalı olmalı ve istenen değerler girilmeli.
+-Genellikle 72ppi veya 300ppi kullanılır.Print için 300 ppi kaliteli içerik sağlar.
+-Content-aware-scale arkaplanı genişletmeyi sağlar.Background olan resimde çalışmayabilir bunun için resmi background harici bir layera dönüştür.
+Herhangi bir objenin yana doğru büyümesini istemezsek (insan,kitapvsvs) 
+1-selection tool ile istenen obje seçilir
+2-select>save selection ve isim verilir.
+3-select>deselect
+4-content-aware-selection>protect kısmında isimlendirilen kısım seçilir.
+5-işlem tamamlanır.
+
+Marquee Tool:Seçilen alanı kesip almamızı sağlar.
+1-Rectangle veya Elliptical marquee tool seçilir ve istenen alan filtrelenir.
+2-Move tool ile filtrelenen alan istenen yere taşınır.
+
+Selection Tool:Kalemle veya filtrelenen alanda obje seçimi yapıp kesmeyi sağlar.
+Object selection tool:Belirtilen alandaki nesneyi alır.
+Quick selection tool:Kalem yardımı ile yapmamızı sağlar.
+
+Masks:Maske kullanımı selection tool veya marquee selection tool ile seçilen alanları maske yapmamızı sağlar.
+Böylece seçilen alan başka bir yere sürüklendiğinde kopyalanır.Kesilmez.Ayrıca Seçilen alana yoğunluk ve tüy gibi özellikler vermemizi sağlar.
+
+Pro selection tool ve maske beraberliği:
+1-Herhangi bir selection tool ile filtreleme yapılır.Filtrelemeyi kontrol etmek için sol alttaki ekran iconuna basılır.
+2-Filtreleme bittikten sonra sağ alttaki create layer maska tıklanır ve maske oluşturulur.Böylece kesme olmaz kopyalama olur.Maske layerı resmin tamamını arkaplanda getirir.
+3-Resmin götürüldüğü yerde Maske seçilerek istenen özellikler eklenebilir.
+
+Not:Eğer maskeleme kenarları kötü görünüyorsa selected and mask taki özellikleri kullan.Saç ile ilgili sorunlarda selected and masktaki
+refine edge brush tool seçeneğini kullan.
+Not:Saç beya yaprak gibi ince ayarlarda saçların arasındaki renk tonuna zıt olacak bir view:arkaplanı seçilir.Selected and mask bölümünde.
+Not:Kenarlardan renk değişimi oluyorsa output settings>documantinate color seçeneği aktif edilir.
+Create Clipping mask:Üst layeri altındaki layerin eklentisi haline getirir.Arkaplanı yapar.
+
+Smart Objenin Faydaları:Bir katmanı smart obje yapmak için katman üzerinde sağ tık>Convert to Smart Object .Normal katman için
+Katman üzerinde sağ tık>Rasteriza Layer.
+-filtrelemeler yapılırken  geçmiş olarak katman altında kaydeder.Böylece istenilen sıradaki filtre kaldırılabilir.Mesela
+5. filtreye geldiğimizde 2. filtrelemeden vazgeçmiş olabiliriz.En başa dönmek yerine günlükten 2. sıradakini silebiliriz.
+-Yapılan filtrelerin sırası değiştirilebilir.
+-Smart Objeler bazı filtreleri çalıştıramaz.Bunun için normal mode alıp filtreyi uygulayıp ardından tekrar smart obje yapmamız gerekir.
+-Katmanı yeniden boyutlandırırken daha önce söylediğimiz çözünürlük kaybını engellemek için kullanılabilir.
+-Filtrelerin yanı sıra boyama,burn gibi bazi araçlarda çalışmaz.
+-Smart objeler çok fazla yer kaplar.Dosya boyutu artar ve photoshop yavaşlar.Ancak uygulama sonunda .psd yerine .jpeg veya .png yaparak
+dosya boyutu azaltılabilir.Dosya boyutu sonuçla ilgilidir.
+-smart objeye double click yapılırsa smart objenin yaratıldığı uygulama açılır.Illistrasyon,lr...
+-Dışardan icon,logo gibi eklentiler kesinlikle smart object olarak alınmalı.
+
+
+
+
+Spot Healin brush tool:Kusurları örtmeye yarar.Trick:
+1-Spot Healing brush tool seçilir ve type:content-aware ,simple all layers açık olmalı
+2-Boş bir katman oluşturulup resmin üstüne atılır.
+3-Kusurlar yok edilir.
+4-Yapılan işlemler tüm katmanları etkilediğinden boş katman efect rolü görür ve boş katman opaklığı ile oynanır.
+Böylece gerçek olamayacak kadar iyi resimler gerçek ve güzel resimlere dönüşür.
+
+
+
+Photoshop export:
+-file>export>export as 
+-eğer sosyal medya içinse quality 100% 
+-web sitesi içinse quality 40-60 arası .
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
